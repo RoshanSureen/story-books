@@ -12,22 +12,26 @@
 </head>
 
 <body>
-  {{> _header}}
+  {{> _header}} {{#if user}} {{> _add-btn}} {{/if}}
   <main>
     <div class="container">
       {{{body}}}
     </div>
   </main>
+  {{> _footer}}
 
   <!-- Compiled and uncompresed JQuery -->
   <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
   <!-- Compiled and minified JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-  
-  {{!-- Sidebar nav initilization --}}
+  <script src="https://cdn.ckeditor.com/4.8.0/standard/ckeditor.js"></script> {{!-- Sidebar nav initilization --}}
   <script>
     $(document).ready(() => {
       $(".button-collapse").sideNav();
+      $("select").material_select();
+    });
+    CKEDITOR.replace("body", {
+      plugins: "wysiwygarea,toolbar,basicstyles,link"
     });
   </script>
 </body>

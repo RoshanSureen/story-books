@@ -16,6 +16,7 @@ var auth = require("./routes/auth");
 // require passport module for your passport.js file
 require("./config/passport")(passport);
 var keys = require("./config/keys");
+var stories = require("./routes/stories");
 
 var app = express();
 
@@ -62,6 +63,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", index);
 app.use("/api", api);
 app.use("/auth", auth);
+app.use("/stories", stories);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
