@@ -8,6 +8,7 @@ var session = require("express-session");
 // require passport
 var passport = require("passport");
 var mongoose = require("mongoose");
+var exphbs = require("express-handlebars");
 
 var index = require("./routes/index");
 var api = require("./routes/api");
@@ -28,8 +29,12 @@ mongoose.connect(keys.mongoURI, (err, res) => {
 });
 
 // view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "hbs");
+// app.set("views", path.join(__dirname, "views"));
+app.engine(".hbs", exphbs({
+  defaultLayout: "layout",
+  extname: ".hbs"
+}));
+app.set("view engine", ".hbs");
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
