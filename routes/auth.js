@@ -17,11 +17,10 @@ router.get(
 
 router.get("/:action", (req, res, next) => {
   var action = req.params.action;
-  if(action === "logout") {
+  if (action === "logout") {
     req.logout();
     res.redirect("/");
-  }
-  if (action === "verify") {
+  } else if (action === "verify") {
     if (req.user) {
       res.json({
         confirmation: "SUCCESS",
@@ -35,12 +34,13 @@ router.get("/:action", (req, res, next) => {
       });
       return;
     }
+  } else {
+    res.json({
+      confirmation: "FAIL",
+      message: `action ${action} not supported`
+    });
+    return;
   }
-  res.json({
-    confirmation: "FAIL",
-    message: `action ${action} not supported`
-  });
-  return;
 });
 
 module.exports = router;
