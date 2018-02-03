@@ -4,12 +4,15 @@ var favicon = require("serve-favicon");
 var logger = require("morgan");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
+var session = require("express-session");
+// require passport
 var passport = require("passport");
 var mongoose = require("mongoose");
 
 var index = require("./routes/index");
 var api = require("./routes/api");
 var auth = require("./routes/auth");
+// require passport module for your passport.js file
 require("./config/passport")(passport);
 var keys = require("./config/keys");
 
@@ -34,6 +37,21 @@ app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false
+  })
+);
+// passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+// global varieables
+app.use((req, res, next) => {
+  res.locals.user = req.user || null;
+  next();
+});
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", index);

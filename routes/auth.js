@@ -15,4 +15,32 @@ router.get(
   }
 );
 
+router.get("/:action", (req, res, next) => {
+  var action = req.params.action;
+  if(action === "logout") {
+    req.logout();
+    res.redirect("/");
+  }
+  if (action === "verify") {
+    if (req.user) {
+      res.json({
+        confirmation: "SUCCESS",
+        result: req.user
+      });
+      return;
+    } else {
+      res.json({
+        confirmation: "FAIL",
+        message: "Not Auth"
+      });
+      return;
+    }
+  }
+  res.json({
+    confirmation: "FAIL",
+    message: `action ${action} not supported`
+  });
+  return;
+});
+
 module.exports = router;

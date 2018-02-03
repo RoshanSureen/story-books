@@ -48,8 +48,25 @@ module.exports = function(passport) {
               });
             }
           })
-          .catch();
+          .catch(err => console.log(err));
       }
     )
   );
+  passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
+  passport.deserializeUser((id, done) => {
+    User.findById(id, (err, result) => {
+      if(err) {
+        res.json({
+          confirmation: "FAIL",
+          message: err
+        });
+        return;
+      } else {
+        done(null, result);
+        return;
+      }
+    });
+  });
 };
