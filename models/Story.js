@@ -5,24 +5,13 @@ var StorySchema = mongoose.Schema({
   body: { type: String, required: true, default: "" },
   status: { type: String, default: "public" },
   allowComments: { type: Boolean, default: true },
-  comments: {
-    type: [
-      {
-        commentBody: { type: String, required: true, default: "" },
-        commentDate: { type: Date, default: Date.now },
-        commentUser: { type: mongoose.Schema.Types.ObjectId, ref: "UserSchema" }
-      }
-    ],
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "UserSchema"
-    },
-    date: {
-      type: Date, default: Date.now
-    },
-    required: true,
-    default: ""
-  }
+  comments: [
+    { commentBody: { type: String, required: true, default: "" } },
+    { commentDate: { type: Date, default: Date.now } },
+    { commentUser: { type: mongoose.Schema.Types.ObjectId, ref: "UserSchema" } }
+  ],
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "UserSchema" },
+  date: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("StorySchema", StorySchema);

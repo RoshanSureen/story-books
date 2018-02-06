@@ -27,5 +27,13 @@ module.exports = {
         }
       });
     });
+  },
+  get: function(params) {
+    return new Promise((resolve, reject) => {
+      Story.find(params)
+        .populate("user")
+        .then(stories => resolve(stories))
+        .catch(err => reject(err));
+    });
   }
 };
