@@ -9,6 +9,7 @@ var session = require("express-session");
 var passport = require("passport");
 var mongoose = require("mongoose");
 var exphbs = require("express-handlebars");
+var methodOverride = require("method-override");
 
 var index = require("./routes/index");
 var api = require("./routes/api");
@@ -17,6 +18,7 @@ var auth = require("./routes/auth");
 require("./config/passport")(passport);
 var keys = require("./config/keys");
 var stories = require("./routes/stories");
+var { truncate, stripTags, formatDate, select } = require("./helpers/hbs");
 
 var app = express();
 
@@ -30,8 +32,13 @@ mongoose.connect(keys.mongoURI, (err, res) => {
 });
 
 // view engine setup
-// app.set("views", path.join(__dirname, "views"));
 app.engine(".hbs", exphbs({
+  helpers: {
+    truncate,
+    stripTags,
+    formatDate,
+    select
+  },
   defaultLayout: "layout",
   extname: ".hbs"
 }));
@@ -42,6 +49,8 @@ app.set("view engine", ".hbs");
 app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+// method override middleware
+app.use(methodOverride("_method"));
 app.use(cookieParser());
 app.use(
   session({

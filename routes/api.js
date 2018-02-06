@@ -17,7 +17,6 @@ router.get("/:resource/:action", (req, res, next) => {
       controller
         .get({ status: "public" })
         .then(stories => {
-          console.log(stories);
           res.render("stories/public", { stories });
           return;
         })
@@ -31,7 +30,34 @@ router.get("/:resource/:action", (req, res, next) => {
     }
   }
 });
-
+router.get("/:resource/:action/:id", (req, res, next) => {
+  var resource = req.params.resource;
+  var action = req.params.action;
+  var id = req.params.id;
+  var controller = controllers[resource];
+  if (controller === null) {
+    res.json({
+      confirmation: "FAIL",
+      message: `Resource ${resource} not supported`
+    });
+    return;
+  } else {
+    if (action === "show") {
+      controller
+        .getByID({ _id: id })
+        .then(story => {
+          res.render("stories/show", { story });
+        })
+        .catch(err => {
+          res.json({
+            confirmation: "FAIL",
+            message: err
+          });
+          return;
+        });
+    }
+  }
+});
 router.post("/:resource/:action", (req, res, next) => {
   var resource = req.params.resource;
   var action = req.params.action;
@@ -47,7 +73,7 @@ router.post("/:resource/:action", (req, res, next) => {
       controller
         .create(req)
         .then(story => {
-          res.redirect(`/stories/show/${story.id}`);
+          res.redirect(`/api/story/show/${story.id}`);
           return;
         })
         .catch(err => {
@@ -58,6 +84,63 @@ router.post("/:resource/:action", (req, res, next) => {
           return;
         });
       return;
+    }
+  }
+});
+router.put("/:resource/:action/:id", (req, res, next) => {
+  var resource = req.params.resource;
+  var action = req.params.action;
+  var id = req.params.id;
+  var controller = controllers[resource];
+  if (controller === null) {
+    res.json({
+      confirmation: "FAIL",
+      message: `Resource ${resource} not supported`
+    });
+    return;
+  } else {
+    if (action === "edit") {
+      controller
+        .edit(id, req.body)
+        .then(story => {
+          res.redirect("/dashboard");
+          return;
+        })
+        .catch(err => {
+          res.json({
+            confirmation: "FAIL",
+            message: "Could not edit the Story"
+          });
+          return;
+        });
+    }
+  }
+});
+router.delete("/:resource/:action/:id", (req, res, next) => {
+  var resource = req.params.resource;
+  var action = req.params.action;
+  var id = req.params.id;
+  var controller = controllers[resource];
+  if (controller === null) {
+    res.json({
+      confirmation: "FAIL",
+      message: `Resource ${resource} not supported`
+    });
+    return;
+  } else {
+    if (action === "delete") {
+      controller
+        .delete({ _id: id })
+        .then(story => {
+           res.redirect("/dashboard");
+        })
+        .catch(err => {
+          res.json({
+            confirmation: "FAIL",
+            message: "Could not delete the Story"
+          });
+          return;
+        });
     }
   }
 });
