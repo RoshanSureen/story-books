@@ -2,26 +2,31 @@ var express = require("express");
 var path = require("path");
 var favicon = require("serve-favicon");
 var logger = require("morgan");
-var cookieParser = require("cookie-parser");
-var bodyParser = require("body-parser");
-var session = require("express-session");
-// require passport
-var passport = require("passport");
-var mongoose = require("mongoose");
 var exphbs = require("express-handlebars");
+var bodyParser = require("body-parser");
 var methodOverride = require("method-override");
+var mongoose = require("mongoose");
+var cookieParser = require("cookie-parser");
+var session = require("express-session");
+var passport = require("passport");
+
+// Load Models
+require("./models/User");
+require("./models/Story");
+
+// Passport config
+require("./config/passport")(passport);
 
 var index = require("./routes/index");
-var api = require("./routes/api");
 var auth = require("./routes/auth");
-// require passport module for your passport.js file
-require("./config/passport")(passport);
+var api = require("./routes/api");
+
+// Load keys
 var keys = require("./config/keys");
-var stories = require("./routes/stories");
 var { truncate, stripTags, formatDate, select } = require("./helpers/hbs");
 
-var app = express();
-
+// Map global promises
+mongoose.Promise = global.Promise;
 // database connection
 mongoose.connect(keys.mongoURI, (err, res) => {
   if (err) {
@@ -31,26 +36,31 @@ mongoose.connect(keys.mongoURI, (err, res) => {
   }
 });
 
-// view engine setup
-app.engine(".hbs", exphbs({
-  helpers: {
-    truncate,
-    stripTags,
-    formatDate,
-    select
-  },
-  defaultLayout: "layout",
-  extname: ".hbs"
-}));
-app.set("view engine", ".hbs");
+var app = express();
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger("dev"));
+// body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
 // method override middleware
 app.use(methodOverride("_method"));
+
+// view engine setup
+app.engine(
+  ".hbs",
+  exphbs({
+    helpers: {
+      truncate,
+      stripTags,
+      formatDate,
+      select
+    },
+    defaultLayout: "layout",
+    extname: ".hbs"
+  })
+);
+app.set("view engine", ".hbs");
+
 app.use(cookieParser());
 app.use(
   session({
@@ -59,20 +69,25 @@ app.use(
     saveUninitialized: false
   })
 );
+
 // passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
+
 // global varieables
 app.use((req, res, next) => {
   res.locals.user = req.user || null;
   next();
 });
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger("dev"));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", index);
 app.use("/api", api);
 app.use("/auth", auth);
-app.use("/stories", stories);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

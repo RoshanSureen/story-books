@@ -1,4 +1,6 @@
-var Story = require("../models/Story");
+var mongoose = require("mongoose");
+var Story = mongoose.model("stories");
+var User = mongoose.model("users");
 var Promise = require("bluebird");
 
 module.exports = {
@@ -17,14 +19,25 @@ module.exports = {
         allowComments: allowComments,
         user: params.user.id
       };
-      Story.create(newStory, (err, result) => {
-        if (err) {
-          reject(err);
-          return;
-        } else {
-          resolve(result);
-          return;
-        }
+      new Story(newStory)
+        .save()
+        .then(result => resolve(result))
+        .catch(err => reject(err));
+    });
+  },
+  addComment: function(id, params) {
+    return new Promise((resolve, reject) => {
+      Story.findOne({ _id: id }).then(result => {
+        const newComment = {
+          commentBody: params.body.commentBody,
+          commentUser: params.user.id
+        };
+        // Add to comments Array - unshift() add the comment to begining of the array
+        result.comments.unshift(newComment);
+        result
+          .save()
+          .then(story => resolve(story))
+          .catch(err => reject(err));
       });
     });
   },
@@ -38,55 +51,43 @@ module.exports = {
   },
   getByID: function(id) {
     return new Promise((resolve, reject) => {
-      Story.findById(id)
+      Story.findOne({ _id: id })
         .populate("user")
-        .exec((err, result) => {
-          if (err) {
-            reject(err);
-            return;
-          } else {
-            resolve(result);
-            return;
-          }
-        });
+        .populate("comments.commentUser")
+        .then(story => resolve(story))
+        .catch(err => reject(err));
     });
   },
   edit: function(id, params) {
     return new Promise((resolve, reject) => {
-      let allowComments;
-      if (params.allowComments) {
-        allowComments = true;
-      } else {
-        allowComments = false;
-      }
-      var editStory = {
-        title: params.title,
-        body: params.body,
-        status: params.status,
-        allowComments: allowComments
-      };
-      Story.findByIdAndUpdate(id, editStory, { new: true }, (err, result) => {
-        if (err) {
-          reject(err);
-          return;
-        } else {
-          resolve(result);
-          return;
-        }
-      });
+      Story.findOne({ _id: id })
+        .then(story => {
+          let allowComments;
+
+          if (params.allowComments) {
+            allowComments = true;
+          } else {
+            allowComments = false;
+          }
+          // New values
+          story.title = params.title;
+          story.body = params.body;
+          story.status = params.status;
+          story.allowComments = allowComments;
+
+          story
+            .save()
+            .then(result => resolve(result))
+            .catch(err => reject(err));
+        })
+        .catch(err => reject(err));
     });
   },
   delete: function(id) {
     return new Promise((resolve, reject) => {
-      Story.remove(id, (err, result) => {
-        if (err) {
-          reject(err);
-          return;
-        } else {
-          resolve(result);
-          return;
-        }
-      });
+      Story.remove({ _id: id })
+        .then(result => resolve(result))
+        .catch(err => reject(err));
     });
   }
 };
